@@ -6,7 +6,7 @@
   const fmt=n=>Number(n).toLocaleString('ru-RU',{maximumFractionDigits:1});
   const all=kind=>(api.state?.records||[]).filter(r=>r.kind===kind).sort((a,b)=>b.date.localeCompare(a.date));
   const motion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches||document.documentElement.classList.contains('motion-paused')?'instant':'smooth';
-  const jump=id=>{const target=el(id);if(!target)return;target.scrollIntoView({behavior:motion(),block:'start'});const control=target.querySelector('input:not([type=hidden]),textarea,button,a');control?.focus({preventScroll:true});};
+  const jump=id=>{window.ImpulseNavigate?.(id);const target=el(id);if(!target)return;target.scrollIntoView({behavior:motion(),block:'start'});const control=target.querySelector('input:not([type=hidden]),textarea,button,a');control?.focus({preventScroll:true});};
   const status=(form,text)=>form.querySelector('.form-status').textContent=text;
   function button(text,action){const b=node('button',text,'secondary');b.type='button';b.onclick=async()=>{b.disabled=true;try{await action();}catch(error){el('cloud-status').textContent=error.message;}finally{b.disabled=false;}};return b;}
   document.querySelectorAll('[data-quick-open]').forEach(b=>b.onclick=()=>el('quick-dialog').showModal());

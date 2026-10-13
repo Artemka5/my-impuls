@@ -30,7 +30,7 @@ html { scroll-padding-top: 0; }
   border-radius: 10px;
   transition: color .18s, background-color .18s, border-color .18s;
 }
-.suite-nav a[aria-current="location"] {
+.suite-nav a[aria-current="page"] {
   background: #c9f64e;
   color: #17200d;
   border-color: #c9f64e;
@@ -49,3 +49,13 @@ html { scroll-padding-top: 0; }
   .suite-nav a { transition: none; }
 }
 html.motion-paused { scroll-behavior: auto; }
+
+/* Only the selected diary section participates in layout. */
+.diary-view[hidden]{display:none!important}
+.section-navigation main>.intro,.section-navigation main>.rhythm-strip{display:none!important}
+.section-navigation .diary-view{min-height:45vh}
+.section-navigation .suite-nav{display:flex;flex-wrap:wrap;overflow:visible;top:0}
+.section-navigation .suite-nav a{flex:1 0 auto}
+.section-navigation .diary-view>.section-label:first-child{margin-top:12px}
+.section-navigation #weight-panel{scroll-margin-top:calc(var(--section-nav-height) + 20px)}
+@media(max-width:560px){.section-navigation .suite-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:6px}.section-navigation .suite-nav a{font-size:11px;padding:8px 4px;min-height:40px;white-space:normal;text-align:center}.section-navigation .account-bar{margin-bottom:14px}}

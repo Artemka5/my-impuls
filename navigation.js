@@ -1,42 +1,44 @@
 (() => {
   'use strict';
-  const nav = document.querySelector('.suite-nav');
-  if (!nav) return;
-  const links = [...nav.querySelectorAll('a[href^="#"]')];
-  const sections = links.map(link => document.getElementById(link.hash.slice(1)));
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  let active = -1, frame = 0;
-  function update() {
-    frame = 0;
-    const edge = nav.getBoundingClientRect().bottom + 32;
-    let next = 0;
-    sections.forEach((section, index) => {
-      if (section && section.getBoundingClientRect().top <= edge) next = index;
-    });
-    if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4) next = links.length - 1;
-    if (next === active) return;
-    active = next;
-    links.forEach((link, index) => {
-      if (index === active) link.setAttribute('aria-current', 'location');
-      else link.removeAttribute('aria-current');
-    });
-    // Move only the horizontal menu; never move the page while tracking scroll.
-    const link = links[active], box = link.getBoundingClientRect(), menu = nav.getBoundingClientRect();
-    if (box.left < menu.left + 12 || box.right > menu.right - 12) {
-      nav.scrollTo({left: nav.scrollLeft + box.left - menu.left - (nav.clientWidth - box.width) / 2,
-        behavior: reduced.matches || document.documentElement.classList.contains('motion-paused') ? 'instant' : 'smooth'});
+  const nav=document.querySelector('.suite-nav');
+  if(!nav)return;
+  const links=[...nav.querySelectorAll('a[href^="#"]')];
+  const weight=document.createElement('section');
+  weight.id='weight-panel';weight.setAttribute('aria-label','Вес');
+  const start=document.getElementById('diary'),end=document.getElementById('food-section');
+  start.before(weight);
+  let current=start;
+  while(current&&current!==end){const next=current.nextSibling;weight.append(current);current=next;}
+  const panels=links.map(link=>link.hash==='#diary'?weight:document.getElementById(link.hash.slice(1)));
+  panels.forEach(panel=>panel.classList.add('diary-view'));
+  document.documentElement.classList.add('section-navigation');
+  document.querySelector('.brand').setAttribute('href','#today-section');
+  let active=null;
+  function open(id,options={}){
+    const target=document.getElementById(id);
+    const panel=panels.find(p=>p===target||p.contains(target))||panels[0];
+    const changed=active!==panel;
+    panels.forEach(p=>p.hidden=p!==panel);active=panel;
+    links.forEach((link,i)=>{if(panels[i]===panel)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
+    if(options.history&&location.hash!=='#'+id)history.pushState(null,'','#'+id);
+    if(options.scroll!==false){
+      const destination=target&&panel.contains(target)?target:panel;
+      requestAnimationFrame(()=>{destination.scrollIntoView({behavior:'instant',block:'start'});if(options.focus){const heading=destination.querySelector('h2,h3')||destination;heading.setAttribute('tabindex','-1');heading.focus({preventScroll:true});}});
     }
+    if(changed)window.dispatchEvent(new Event('resize'));
   }
-  const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
-  const measure = () => {
-    document.documentElement.style.setProperty('--section-nav-height', nav.offsetHeight + 'px');
-    schedule();
-  };
-  window.addEventListener('scroll', schedule, {passive: true});
-  window.addEventListener('resize', measure, {passive: true});
-  window.addEventListener('hashchange', schedule);
-  window.addEventListener('impulse-data', schedule);
-  window.addEventListener('load', measure);
-  if ('ResizeObserver' in window) new ResizeObserver(measure).observe(nav);
-  measure();
+  window.ImpulseNavigate=id=>open(id,{history:true});
+  document.addEventListener('click',event=>{
+    const link=event.target.closest('a[href^="#"]');
+    if(!link||event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
+    const id=link.hash.slice(1),target=document.getElementById(id);
+    if(!target||!panels.some(p=>p===target||p.contains(target)))return;
+    event.preventDefault();open(id,{history:true,focus:nav.contains(link)});
+  },true);
+  window.addEventListener('hashchange',()=>open(location.hash.slice(1)));
+  window.addEventListener('popstate',()=>open(location.hash.slice(1)));
+  const measure=()=>document.documentElement.style.setProperty('--section-nav-height',nav.offsetHeight+'px');
+  window.addEventListener('resize',measure);
+  if('ResizeObserver'in window)new ResizeObserver(measure).observe(nav);
+  measure();open(location.hash.slice(1),{scroll:false});
 })();
