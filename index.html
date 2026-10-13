@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10110f">
+  <meta name="description" content="Мой импульс — личный дневник веса, питания и самочувствия. Маленькие шаги, каждый день.">
+  <title>Мой импульс — твой ритм, каждый день</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <style>
+    :root { color-scheme:dark; --lime:#c9f64e; --muted:#aaaDa3; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100svh; background:#10110f; color:#f4f5ef; font-family:Arial,Helvetica,sans-serif; overflow-x:hidden; }
+    body::before { content:""; position:fixed; inset:0; pointer-events:none; background:radial-gradient(ellipse at 90% 5%,#b7ed3220,transparent 45%),radial-gradient(ellipse at 0% 90%,#779e2014,transparent 45%); }
+    .wrap { position:relative; max-width:1180px; margin:auto; padding:32px 40px 24px; }
+    header,footer { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+    .brand { display:flex; align-items:center; gap:12px; font-size:14px; font-weight:900; letter-spacing:.08em; }
+    .brand img { width:40px; height:40px; }
+    .tag { color:var(--muted); font-size:12px; letter-spacing:.12em; text-transform:uppercase; }
+    main { display:grid; grid-template-columns:1.25fr 1fr; align-items:center; gap:40px; min-height:68svh; padding:60px 0; }
+    .eyebrow { display:flex; align-items:center; gap:10px; color:var(--lime); font-size:12px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; }
+    .dot { width:7px; height:7px; background:var(--lime); border-radius:50%; box-shadow:0 0 20px #c9f64980; }
+    h1 { margin:24px 0; font-size:clamp(56px,7.6vw,104px); line-height:.95; letter-spacing:-.065em; font-weight:950; }
+    h1 span { display:block; color:var(--lime); text-shadow:0 3px #647e26; }
+    .intro { max-width:390px; color:#c1c4b9; font-size:18px; line-height:1.65; }
+    .cta { display:inline-flex; align-items:center; gap:36px; min-height:60px; margin-top:24px; padding:18px 24px; border-radius:16px; background:var(--lime); color:#15170d; text-decoration:none; font-size:17px; font-weight:800; transition:transform .2s,box-shadow .2s; }
+    .cta:hover { transform:translateY(-3px); box-shadow:0 10px 36px #c9f64e25; }
+    a:focus-visible { outline:3px solid white; outline-offset:6px; }
+    .hint { max-width:370px; margin:14px 0 0; color:var(--muted); font-size:12px; line-height:1.7; }
+    .visual { position:relative; display:grid; place-items:center; aspect-ratio:1; max-width:450px; width:100%; justify-self:center; }
+    .orbit { position:absolute; inset:8%; border:1px solid #c9f64e25; border-radius:50%; animation:turn 35s linear infinite; }
+    .orbit::before { content:""; position:absolute; width:10px; height:10px; border-radius:50%; background:var(--lime); top:13%; left:13%; box-shadow:0 0 24px #c9f64e90; }
+    .orbit.two { inset:0; transform:rotate(35deg); animation-direction:reverse; border-color:#ffffff09; }
+    .pulse-card { position:relative; width:72%; aspect-ratio:1; border:1px solid #ffffff15; border-radius:42px; background:linear-gradient(140deg,#282d20,#151811 75%); box-shadow:0 30px 80px #0007,inset 0 1px #ffffff08; display:flex; flex-direction:column; justify-content:center; padding:30px; transform:rotate(-6deg); animation:float 7s ease-in-out infinite; }
+    .pulse-card svg { width:100%; height:auto; color:var(--lime); filter:drop-shadow(0 0 12px #c9f64e30); }
+    .card-label { margin-top:28px; text-align:center; color:#c5cbb8; font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; }
+    .badge { position:absolute; bottom:12%; right:0; padding:14px 18px; background:#c9f64e; color:#1b220e; border-radius:14px; font-size:13px; font-weight:800; transform:rotate(4deg); }
+    .features { display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid #ffffff14; border-bottom:1px solid #ffffff14; }
+    .feature { padding:26px 20px; }
+    .feature:first-child { padding-left:0; }
+    .feature + .feature { border-left:1px solid #ffffff14; }
+    .num { color:#78865a; font-size:11px; letter-spacing:.08em; }
+    h2 { margin:10px 0 8px; font-size:17px; }
+    .feature p { margin:0; color:var(--muted); font-size:13px; line-height:1.6; }
+    footer { padding-top:26px; color:#858a7b; font-size:11px; line-height:1.6; }
+    @keyframes turn { to { transform:rotate(360deg); } }
+    @keyframes float { 50% { transform:translateY(-12px) rotate(-3deg); } }
+    @media(max-width:700px) { .wrap { padding:24px; } .tag { display:none; } main { grid-template-columns:1fr; gap:12px; padding:48px 0 30px; min-height:0; } h1 { font-size:clamp(58px,13vw,90px); } .intro { font-size:16px; } .visual { max-width:300px; } .features { grid-template-columns:1fr; } .feature,.feature:first-child { padding:20px 0; } .feature + .feature { border-left:0; border-top:1px solid #ffffff0c; } footer { align-items:flex-start; flex-direction:column; gap:5px; } }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header><div class="brand"><img src="./icon.svg" alt="" width="40" height="40">МОЙ ИМПУЛЬС</div><span class="tag">Твой ритм. Твои маленькие победы.</span></header>
+    <main>
+      <section aria-labelledby="title">
+        <div class="eyebrow"><span class="dot" aria-hidden="true"></span>Забота о себе начинается здесь</div>
+        <h1 id="title">МОЙ<span>ИМПУЛЬС.</span></h1>
+        <p class="intro">Замечай перемены. Слушай себя.<br>Двигайся в своём темпе — каждый день.</p>
+        <a class="cta" href="https://mama-fit-diary.sunnybean8.chatgpt.site/diary#today-section">Открыть дневник <span aria-hidden="true">↗</span></a>
+        <p class="hint">Дневник откроется на chatgpt.site.<br>Для доступа потребуется вход в разрешённый аккаунт ChatGPT.</p>
+      </section>
+      <div class="visual" aria-hidden="true"><div class="orbit two"></div><div class="orbit"></div><div class="pulse-card"><svg viewBox="0 0 240 130" fill="none"><path d="M10 70H65L88 22L123 111L154 48L172 70H230" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="card-label">В своём ритме</div></div><div class="badge">Маленький шаг — уже прогресс</div></div>
+    </main>
+    <div class="features">
+      <section class="feature"><span class="num">01 / ДИНАМИКА</span><h2>Замечай свой прогресс</h2><p>Вес, замеры и личные заметки в одном дневнике.</p></section>
+      <section class="feature"><span class="num">02 / ПИТАНИЕ</span><h2>Сохраняй любимые блюда</h2><p>Записи о питании, фото и оценка калорий с помощью ИИ.</p></section>
+      <section class="feature"><span class="num">03 / САМОЧУВСТВИЕ</span><h2>Находи свой баланс</h2><p>Сон, настроение, активность и полезные привычки.</p></section>
+    </div>
+    <footer><span>МОЙ ИМПУЛЬС · Сделано с заботой</span><span>Один день. Один шаг. Для себя.</span></footer>
+  </div>
+</body>
+</html>
