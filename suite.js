@@ -34,7 +34,26 @@
   function updateAI(){el('analyze-meal').disabled=!api.state?.aiReady||(!photoId&&!photoBlob)||!el('ai-consent').checked||photoBusy||el('meal-form').getAttribute('aria-busy')==='true';}
   el('ai-consent').onchange=updateAI;
   el('meal-photo').onchange=async()=>{const file=el('meal-photo').files[0];if(!file)return;clearPhoto();const generation=photoGeneration;photoBusy=true;el('meal-form').querySelector('.primary').disabled=true;el('ai-status').textContent='Подготавливаем фото…';updateAI();try{if(file.size>12*1024*1024)throw Error('Выбери фото меньше 12 МБ.');if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('Выбери JPEG, PNG или WebP.');const bitmap=await createImageBitmap(file);const ratio=Math.min(1,1280/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*ratio));canvas.height=Math.max(1,Math.round(bitmap.height*ratio));const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.82));if(!blob||blob.size>4000000)throw Error('Не удалось уменьшить фото. Выбери другое.');if(generation!==photoGeneration)return;photoBlob=blob;photoUrl=URL.createObjectURL(blob);el('meal-preview').src=photoUrl;el('meal-preview').hidden=false;el('remove-photo').hidden=false;el('ai-status').textContent='Фото готово. Можно сохранить блюдо или запросить оценку.';}catch(error){if(generation===photoGeneration)el('ai-status').textContent=error.message;}finally{photoBusy=false;el('meal-form').querySelector('.primary').disabled=!api.state;updateAI();}};
-  el('analyze-meal').onclick=async()=>{const form=el('meal-form');lockForm(form,true);el('ai-status').textContent='Gemini оценивает блюдо…';try{await ensurePhoto();const {estimate:e}=await api.request('/api/analyze',{method:'POST',body:JSON.stringify({photoId,portion:field(form,'portion').value.trim(),consent:el('ai-consent').checked})});if(!e.detected){el('ai-status').textContent=e.explanation||'Еда не распознана. Попробуй другое фото.';return;}for(const key of ['name','portion','kcal','protein','fat','carbs'])field(form,key).value=typeof e[key]==='number'?Math.round(e[key]*10)/10:e[key];estimated=true;el('ai-status').textContent=`Ориентир: ${fmt(e.kcalLow)}–${fmt(e.kcalHigh)} ккал. ${e.explanation} Проверь значения перед сохранением.`;}catch(error){el('ai-status').textContent=error.message;}finally{lockForm(form,false);}};
+  el('analyze-meal').onclick=async()=>{
+    const form=el('meal-form'),button=el('analyze-meal'),message=el('ai-status');
+    if(form.getAttribute('aria-busy')==='true')return;
+    const original=button.textContent;
+    lockForm(form,true);button.textContent='Загружаем фото…';message.textContent='Сохраняем фото перед оценкой…';
+    message.style.cssText='padding:12px;border:1px solid #c9f64e;border-radius:10px;color:#eaffc8;min-height:44px';
+    message.scrollIntoView({behavior:'smooth',block:'center'});
+    let timer;
+    try{
+      await ensurePhoto();let seconds=0;
+      button.textContent='Gemini анализирует · 0 с';message.textContent='Фото загружено. Оцениваем состав и порцию. Это может занять около минуты.';
+      timer=setInterval(()=>{seconds++;button.textContent=`Gemini анализирует · ${seconds} с`;if(seconds===25)message.textContent='Gemini отвечает медленно. Сервер может повторить запрос; фото загружать заново не нужно.';},1000);
+      const portion=[field(form,'name').value.trim(),field(form,'portion').value.trim()].filter(Boolean).join('. ').slice(0,200);
+      const {estimate:e}=await api.request('/api/analyze',{method:'POST',body:JSON.stringify({photoId,portion,consent:el('ai-consent').checked}),signal:AbortSignal.timeout(65000)});
+      if(!e.detected){message.textContent=e.explanation||'Еда не распознана. Попробуй другое фото.';return;}
+      for(const key of ['name','portion','kcal','protein','fat','carbs'])field(form,key).value=typeof e[key]==='number'?Math.round(e[key]*10)/10:e[key];
+      estimated=true;message.textContent=`Готово! Ориентир: ${fmt(e.kcalLow)}–${fmt(e.kcalHigh)} ккал. ${e.explanation} Проверь значения перед сохранением.`;
+    }catch(error){message.textContent=error.name==='TimeoutError'?'Ожидание ответа закончилось. Попробуй позже; фото и введённые данные остаются в форме.':error.message;message.style.borderColor='#ffba92';}
+    finally{clearInterval(timer);button.textContent=original;lockForm(form,false);}
+  };
   function button(text,action){const b=node('button',text,'secondary');b.type='button';b.onclick=async()=>{b.disabled=true;try{await action();}catch(error){el('cloud-status').textContent=error.message;}finally{b.disabled=false;}};return b;}
   function askDelete(record){pending=record;el('suite-delete-status').textContent='';el('suite-confirm').showModal();}
   el('suite-cancel').onclick=()=>{el('suite-confirm').close();pending=null;};el('suite-delete').onclick=async()=>{if(!pending)return;el('suite-delete').disabled=true;el('suite-delete-status').textContent='Удаляем…';try{const removed=pending;await api.remove(removed);if(editing.get(removed.kind)?.id===removed.id)reset(removed.kind);el('suite-confirm').close();pending=null;}catch(error){el('suite-delete-status').textContent=error.message;}finally{el('suite-delete').disabled=false;}};
